@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>mitiShop</title>
+  <title>MitiShop</title>
   <style>
     :root{
       --primary:#6b46c1;
@@ -29,6 +29,10 @@
       border-radius:var(--radius);
       font-weight:bold;
       cursor:pointer;
+      transition:0.2s;
+    }
+    .miti-button:hover{
+      opacity:0.9;
     }
     .miti-badge{
       margin-left:8px;
@@ -43,6 +47,7 @@
       display:none;
       align-items:center; justify-content:center;
       background:rgba(0,0,0,0.4);
+      z-index:999;
     }
     .miti-overlay.open{display:flex;}
     .miti-panel{
@@ -50,6 +55,12 @@
       border-radius:var(--radius);
       padding:16px;
       width:90%; max-width:600px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.2);
+      animation:fadeIn .25s ease;
+    }
+    @keyframes fadeIn{
+      from{opacity:0; transform:translateY(-10px);}
+      to{opacity:1; transform:translateY(0);}
     }
     .miti-head{
       display:flex; justify-content:space-between; align-items:center;
@@ -76,11 +87,15 @@
       constructor(){
         super();
         this.attachShadow({mode:'open'});
-        this.state = {open:false, cart:[], items:[
-          {id:1,name:"Camiseta",price:59.90},
-          {id:2,name:"Boné",price:39.90},
-          {id:3,name:"Caneca",price:24.50}
-        ]};
+        this.state = {
+          open:false, 
+          cart:[], 
+          items:[
+            {id:1,name:"Camiseta",price:59.90},
+            {id:2,name:"Boné",price:39.90},
+            {id:3,name:"Caneca",price:24.50}
+          ]
+        };
         this.render();
       }
 
@@ -115,7 +130,7 @@
             <div class="miti-panel">
               <div class="miti-head">
                 <div><strong>${this.title}</strong></div>
-                <button class="close-shop btn-ghost">✕</button>
+                <button class="close-shop btn btn-ghost">✕</button>
               </div>
               ${this.state.items.map(i=>`
                 <div class="product">
