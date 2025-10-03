@@ -31,9 +31,7 @@
       cursor:pointer;
       transition:0.2s;
     }
-    .miti-button:hover{
-      opacity:0.9;
-    }
+    .miti-button:hover{opacity:0.9;}
     .miti-badge{
       margin-left:8px;
       background:#fff3;
@@ -69,12 +67,15 @@
     .product{
       display:flex; justify-content:space-between; align-items:center;
       padding:8px 0; border-bottom:1px solid #eee;
+      gap:10px;
     }
     .product-name{font-weight:bold;}
     .btn{padding:6px 10px; border:0; border-radius:var(--radius); cursor:pointer;}
     .btn-primary{background:var(--primary); color:#fff;}
     .btn-ghost{background:#eee;}
+    .btn[disabled]{background:#ccc; cursor:not-allowed;}
     .cart{margin-top:12px; font-weight:bold;}
+    .stock{font-size:0.8rem; color:var(--muted);}
   </style>
 </head>
 <body>
@@ -91,9 +92,9 @@
           open:false, 
           cart:[], 
           items:[
-            {id:1,name:"Camiseta",price:59.90},
-            {id:2,name:"Boné",price:39.90},
-            {id:3,name:"Caneca",price:24.50}
+            {id:1,name:"Camiseta",price:59.90, stock:5},
+            {id:2,name:"Boné",price:39.90, stock:3},
+            {id:3,name:"Caneca",price:24.50, stock:2}
           ]
         };
         this.render();
@@ -113,8 +114,9 @@
 
       add(id){
         const item = this.state.items.find(i=>i.id==id);
-        if(!item) return;
+        if(!item || item.stock <= 0) return;
         this.state.cart.push(item);
+        item.stock -= 1; // diminui estoque
         this.render();
       }
 
@@ -136,7 +138,8 @@
                 <div class="product">
                   <span class="product-name">${i.name}</span>
                   <span>${this.format(i.price)}</span>
-                  <button class="btn btn-primary add-btn" data-id="${i.id}">+ add</button>
+                  <span class="stock">Estoque: ${i.stock}</span>
+                  <button class="btn btn-primary add-btn" data-id="${i.id}" ${i.stock<=0?'disabled':''}>+ add</button>
                 </div>`).join('')}
               <div class="cart">Total: ${this.format(total)}</div>
             </div>
@@ -148,3 +151,4 @@
   </script>
 </body>
 </html>
+
