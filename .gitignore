@@ -1,18 +1,135 @@
-# This .gitignore is appropriate for repositories deployed to GitHub Pages and using
-# a Gemfile as specified at https://github.com/github/pages-gem#conventional
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>mitiShop</title>
+  <style>
+    :root{
+      --primary:#6b46c1;
+      --surface:#fff;
+      --muted:#666;
+      --radius:10px;
+      font-family: Arial, sans-serif;
+    }
+    body{
+      margin:0; 
+      min-height:100vh; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      background:#f5f5f5;
+    }
+    /* botão */
+    .miti-button{
+      background:var(--primary);
+      color:#fff;
+      border:0;
+      padding:10px 16px;
+      border-radius:var(--radius);
+      font-weight:bold;
+      cursor:pointer;
+    }
+    .miti-badge{
+      margin-left:8px;
+      background:#fff3;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:0.8rem;
+    }
+    /* modal */
+    .miti-overlay{
+      position:fixed; inset:0;
+      display:none;
+      align-items:center; justify-content:center;
+      background:rgba(0,0,0,0.4);
+    }
+    .miti-overlay.open{display:flex;}
+    .miti-panel{
+      background:var(--surface);
+      border-radius:var(--radius);
+      padding:16px;
+      width:90%; max-width:600px;
+    }
+    .miti-head{
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:12px;
+    }
+    .product{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:8px 0; border-bottom:1px solid #eee;
+    }
+    .product-name{font-weight:bold;}
+    .btn{padding:6px 10px; border:0; border-radius:var(--radius); cursor:pointer;}
+    .btn-primary{background:var(--primary); color:#fff;}
+    .btn-ghost{background:#eee;}
+    .cart{margin-top:12px; font-weight:bold;}
+  </style>
+</head>
+<body>
 
-# Basic Jekyll gitignores (synchronize to Jekyll.gitignore)
-_site/
-.sass-cache/
-.jekyll-cache/
-.jekyll-metadata
+  <!-- Uso -->
+  <miti-shop shop-title="MitiShop" currency="R$"></miti-shop>
 
-# Additional Ruby/bundler ignore for when you run: bundle install
-/vendor
+  <script>
+    class MitiShop extends HTMLElement {
+      constructor(){
+        super();
+        this.attachShadow({mode:'open'});
+        this.state = {open:false, cart:[], items:[
+          {id:1,name:"Camiseta",price:59.90},
+          {id:2,name:"Boné",price:39.90},
+          {id:3,name:"Caneca",price:24.50}
+        ]};
+        this.render();
+      }
 
-# Specific ignore for GitHub Pages
-# GitHub Pages will always use its own deployed version of pages-gem 
-# This means GitHub Pages will NOT use your Gemfile.lock and therefore it is
-# counterproductive to check this file into the repository.
-# Details at https://github.com/github/pages-gem/issues/768
-Gemfile.lock
+      connectedCallback(){
+        this.title = this.getAttribute('shop-title') || 'mitiShop';
+        this.currency = this.getAttribute('currency') || 'R$';
+        this.shadowRoot.addEventListener('click', e=>{
+          if(e.target.classList.contains('open-shop')) this.toggle(true);
+          if(e.target.classList.contains('close-shop')) this.toggle(false);
+          if(e.target.classList.contains('add-btn')) this.add(e.target.dataset.id);
+        });
+      }
+
+      format(v){return `${this.currency} ${v.toFixed(2).replace('.',',')}`;}
+
+      add(id){
+        const item = this.state.items.find(i=>i.id==id);
+        if(!item) return;
+        this.state.cart.push(item);
+        this.render();
+      }
+
+      toggle(open){this.state.open=open; this.render();}
+
+      render(){
+        const c=this.state.cart.length;
+        const total=this.state.cart.reduce((s,i)=>s+i.price,0);
+        this.shadowRoot.innerHTML=`
+          <style>${document.querySelector("style").innerHTML}</style>
+          <button class="miti-button open-shop">${this.title}<span class="miti-badge">${c}</span></button>
+          <div class="miti-overlay ${this.state.open?'open':''}">
+            <div class="miti-panel">
+              <div class="miti-head">
+                <div><strong>${this.title}</strong></div>
+                <button class="close-shop btn-ghost">✕</button>
+              </div>
+              ${this.state.items.map(i=>`
+                <div class="product">
+                  <span class="product-name">${i.name}</span>
+                  <span>${this.format(i.price)}</span>
+                  <button class="btn btn-primary add-btn" data-id="${i.id}">+ add</button>
+                </div>`).join('')}
+              <div class="cart">Total: ${this.format(total)}</div>
+            </div>
+          </div>
+        `;
+      }
+    }
+    customElements.define('miti-shop', MitiShop);
+  </script>
+</body>
+</html>
